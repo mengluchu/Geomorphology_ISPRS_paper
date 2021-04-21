@@ -62,8 +62,8 @@
 % thanks to Niclas Borlin 05-05-2016
 
 
-\commission{ZZ, }{YY} %This field is optional. If filled, XX and YY should be replaced by adequate numbers. See https://www2.isprs.org/commissions/
-\workinggroup{XX/YY} %This field is optional.
+\commission{III, }{YY} %This field is optional. If filled, XX and YY should be replaced by adequate numbers. See https://www2.isprs.org/commissions/
+\workinggroup{III/1} %This field is optional.
 \icwg{}   %This field is optional.
 
 
@@ -96,7 +96,7 @@ This study is both application- and method-driven. It provides us with an in-dep
  
 The study is mainly developed in Western Scheldt, the Netherlands (\cref{fig:ws_o}), where a detailed manually delineated expert classification map is available. 
 %We also conduct extensive evaluations in a study area with different geomorphological characters, Wadden Sea (\cref{fig:wadden}), to evaluate model generality. 
-\Cref{fig:ws_o} (b) shows our classification scheme. Importantly, we distinguish between the sandy and silty areas within the shoal flat low dynamics (\cref{fig:xgb}). We used aerial imagery with red, green, and NIR bands (0.25 m resolution), DEM from laser altimeters (2 m resolution), and derived indices. Imagery and DEM are acquired within the same year and season. Two methods are developed and compared in terms of the priors integrated, model interpretability, and the prediction accuracy and patterns. The first method firstly applies OBIA (Object-based Image Analysis) for segmentation and then uses an emsemble tree-based method, XGBoost \citep{Chen:2016:XST:2939672.2939785}, for classification, this method is referred to (OBIA-XGB) in this study. The challenges of this method lie in the identification of the optimal spatial unit of objects. The second method applies an encoder-decoder deep neural network architectures, U-net \citep{ronneberger2015u}, for end-to-end classification. 
+\Cref{fig:ws_o} (b) shows our classification scheme. Importantly, we distinguish between the sandy and silty areas within the shoal flat low dynamics. We used aerial imagery with red, green, and NIR bands (0.25 m resolution), DEM from laser altimeters (2 m resolution), and derived indices. Imagery and DEM are acquired within the same year and season. Two methods are developed and compared in terms of the priors integrated, model interpretability, and the prediction accuracy and patterns. The first method firstly applies OBIA (Object-based Image Analysis) for segmentation and then uses an emsemble tree-based method, XGBoost \citep{Chen:2016:XST:2939672.2939785}, for classification, this method is referred to (OBIA-XGB) in this study. The challenges of this method lie in the identification of the optimal spatial unit of objects. The second method applies an encoder-decoder deep neural network architectures, U-net \citep{ronneberger2015u}, for end-to-end classification. 
 
 % leave out for this paper because we havent reached them. 
 
@@ -113,12 +113,6 @@ The study is mainly developed in Western Scheldt, the Netherlands (\cref{fig:ws_
     \label{fig:ws_o}
 \end{figure}
 
-\begin{figure}[!h]
-    \centering
-    \includegraphics[scale=0.4]{figures/false_classificationvertical.png}
-    \caption{(a): the Wadden Sea study area, visualised in false color with the red, green, and Near-Infrared bands of aerial images of 0.25 m resolution. (b): the classification schemes. The map is made by manually fine-tuning the result of an OBIA model. The model was developed in the Western Scheldt and adapted to make it more general. }
-    \label{fig:wadden}
-\end{figure}
 
 \subsection{Preprocessing}
 
@@ -133,19 +127,19 @@ We focus on distinguishing between 5 classes and for convenience, we assign a co
 
 For the definition of the classes please refer to \cite{Douma2019}. We also refer to the P1a1, P1a2, P2b, and P2c classes as the "P" class and the H1 class "H" class. The other classes (i.e. classes that do not belong to the P and H1 classes) are removed. 
 
-We filtered out water by firstly using eCognition (Developer 9.4.0) to do segmentation, and then using the NDWI ($NDWI = \frac{green - NIR}{green + NIR}$) with a threshold of 0.44. Mega-ripples naturally consists of water. In this study, we also filtered out water in the P2b (mega-ripple) class to gain an initial understanding of the behaviour of machine learning models.   
+We filtered out water by firstly using eCognition (Developer 9.4.0) to do segmentation, and then using the NDWI ($NDWI = \frac{green - NIR}{green + NIR}$) with a threshold of 0.44. Mega-ripples naturally consist of water. In this study, we also filtered out water in the P2b (mega-ripple) class to gain an initial understanding of the behaviour of machine learning models.   
 
 \subsection{Sampling scheme}
 \label{cv}
 
-As the unit of method OBIA-XGB is OBIA segments and method U-net image pixels, we develop different sampling schemes for each of them. For method OBIA-XGB, it is necessary to develop a sampling scheme that accounts for the object size for the tree classifier. We evaluated two sampling schemes: 1) random sampling and 2) stratified sampling according to the size of OBIA segments. For 1), we used random under-sampling to sample the majority class(es), without replacement, to ensure the classes have balanced samples. For 2), we firstly divided the objects into 5 categories, cut at each 2nd, 4th, 6th, 8th, 10th percentiles of the object size of the minority class (i.e. class with the least number of objects). These percentiles are chosen so that the number of objects in these categories are similar. Within each category, 70\% of the objects form the training set and the rest forms the test set. Then within the training set of each category, random under-sampling is applied. 
+As the unit of method OBIA-XGB is OBIA segments and method U-net image pixels, we develop different sampling schemes for each of them. For method OBIA-XGB, it is necessary to develop a sampling scheme that accounts for the object size for the tree classifier. We evaluated two sampling schemes: 1) random sampling and 2) stratified sampling according to the size of OBIA segments. For 1), we used random under-sampling to sample the majority class(es), without replacement, to ensure the classes have balanced samples. For 2), we firstly divided the objects into 5 categories, cut at each 20th, 40th, 60th, 80th, 100th percentiles of the object size of the minority class (i.e. class with the least number of objects). These percentiles are used so that the number of objects in these categories are similar. Within each category, 70\% of the objects form the training set and the rest forms the test set. Then within the training set of each category, random under-sampling is applied. 
 
-For OBIA-XGB, we selected three tiles that are abundantly covered by the focused classes (i.e. P and H1 classes). For the method based on U-net, we selected 80 500 pixels $\times$ 500 pixels tiles for training (42 tiles) and validation (18 tiles). Three 4000 $\times$ 4000 tiles are used for testing (\cref{fig:tt}). 
+For OBIA-XGB, we selected three tiles that are abundantly covered by the focused classes (i.e. P and H1 classes) for identifying the optimum spatial unit and model training. For the method based on U-net, we selected 80 500 pixels $\times$ 500 pixels tiles for training (42 tiles) and validation (18 tiles). Three 4000 $\times$ 4000 tiles are used for testing both of the methods and calculating the accuracy metrics. The train-test splitting is shown in \cref{fig:tt}. 
 
 \begin{figure}
     \centering
     \includegraphics[scale = 0.3]{figures/train_test_tileOverview.png}
-    \caption{Training, validation, and test areas used in Western Scheldt.}
+    \caption{Training, validation, and test areas used by the machine learning methods, Western Scheldt.}
     \label{fig:tt}
 \end{figure}
 
@@ -153,7 +147,7 @@ For OBIA-XGB, we selected three tiles that are abundantly covered by the focused
 
 We focus on the precision (True Positives)/(True Positives + False Positives) and recall (True Positives)/(True Positives + True Negatives) as indicators of the prediction accuracy.  
 %and additionally IoU (Intersect over Union) for (B). 
-For method A, the precision and recall are weighted by the area size of each object for the final recall and precision. In addition, we present the precision and recall based on objects (i.e. not weighted by the area size). This serves to inspect how the objects with various sizes are identified.  
+For OBIA-XGB, the precision and recall are weighted by the area size of each object for the final recall and precision. In addition, we present the precision and recall based on objects (i.e. not weighted by the area size). This serves to inspect how the objects with various sizes are identified.  
 
 \section{Experiments}
 
@@ -161,7 +155,9 @@ For method A, the precision and recall are weighted by the area size of each obj
 
 The inputs of the OBIA-XGB method are aerial imagery (with NIR, red, green bands) and DEM, as well as slope \citep{zevenbergen1987quantitative}, NDVI, and aspect (\citep{horn1981hill}) derived from eCognition. 
 
-We firstly use eCognition for object segmentation at various spatial units. Then, we combine segmentation levels to get sub-object describing brighter and darker sub-objects features. We export the objects with in total 48 features describing the spectral and texture (using Harralick's grey level co-ocurrence matrices) features of objects and sub-objects.
+We firstly use eCognition for object segmentation at various spatial units. Then, we combine segmentation levels to get sub-objects and related features. 
+%describing brighter and darker sub-objects features. 
+We export the objects with in total 48 features describing the spectral and texture (using Harralick's grey level co-ocurrence matrices) features of objects and sub-objects.
 %Lars: add details, which features and sub-features you exported. 
 
 Then, to determine the optimal spatial unit for each class, we each time regroup the five classes into the "target class" and the "other class" and iterate over all the five classes. The XGBoost is applied to classify the OBIA calculated object features and select the best spatial unit for each class based on the prediction accuracy. 
@@ -172,7 +168,7 @@ The hyperparameters we tuned for XGBoost are learning rate, maximun tree-depth, 
 
 \subsection{Method-based on U-net}
 
-The input for the U-net is the aerial imagery, DEM, and derived slope \citep{horn1981hill}, NDVI and a Brightness layers. The slope was calculated in QGIS3.18 using the same Horn's formula \citep{horn1981hill} as in eCognition, and is expressed in degrees. The NDVI and brightness are calculated in Python. The Brightness is defined as $Brightness =  (NIR+red+green)/3$.
+The input for the U-net is the aerial imagery, DEM, and derived slope \citep{horn1981hill}, NDVI, and  Brightness layers. The slope was calculated in QGIS3.18 using the same Horn's formula \citep{horn1981hill} as in eCognition, and is expressed in degrees. The NDVI and brightness are calculated in Python. The Brightness is defined as $Brightness =  (NIR+red+green)/3$.
  
 The loss functions we tested are categorical cross-entropy loss, IoU loss \citep{van2019deep}, FocalTverskyLoss \citep{abraham2019novel}, and Lovasz Hinge Loss \citep{berman2018lovasz}. In the end, we chose to use the IoU loss as it provides the best cross-validation results with the training set. The hyperparameters we tuned are learning rate, batch size, and image size. The image size tested are from $2^5$ (64) to $2^9$ (512) and is optimised at 128. The batch size tested are from 8 to 32 and is optimised at 16. The learning rate are tested with various scheduling, ranging from 0.0001 to 0.01 at various epochs. 
  
@@ -183,7 +179,7 @@ The loss functions we tested are categorical cross-entropy loss, IoU loss \citep
 \subsection{Spatial unit optimisation for OBIA-XGB}
 \label{sec:suo}
 
- \Cref{fig:overview} shows the precision and recall of different sampling schemes and cross-validation methods for the binary classification in the Western Scheldt study area. The stratified sampling greatly improves the prediction accuracy, comparing the cross validation between applying our stratified sampling (SS) scheme to random sampling of the objects (object).
+ \Cref{fig:overview} shows the precision and recall of different sampling schemes and cross-validation methods for the binary classification in the Western Scheldt study area. The stratified sampling greatly improves the prediction accuracy, comparing the cross validation between applying our Stratified Sampling (SS) scheme to random sampling of the objects (object).
  
   \begin{figure}[!h]
     \centering
@@ -198,48 +194,49 @@ The loss functions we tested are categorical cross-entropy loss, IoU loss \citep
 
 \subsection{Prediction accuracy}
 \subsubsection{Method OBIA-XGB}
-The multi-class classification results for the method OBIA-XGB are shown in \cref{xgb_ss,xgb_ssac,fig:spxgb}. SSAC is used to indicate the performance and SS for indicating how well the smaller objects are classified. According to SSAC, the megaripple class obtained the highest precision, indicating the method OBIA-XGB is already promising in distinguishing it from other P classes and the H1 class. The sandy and silty low dynamic flats are also separated well. 
+The accuracy metrics of the OBIA-XGB are shown in \cref{xgb_ss,xgb_ssac}. SSAC is used to indicate the performance and SS for indicating how well the smaller objects are classified. According to SSAC, the megaripple class obtained the highest precision, indicating the method OBIA-XGB is already promising in distinguishing it from other P classes and the H1 class. The sandy and silty low dynamic flats are not well separated. 
 
-Comparing \cref{xgb_ss,xgb_ssac}, it is observed that small objects are classified best in the P2b and H1 classes but are less satisfying in P1a1, P1a2, and P2c. \Cref{fig:spxgb} shows that most of the objects are correctly classified, mis-classification mostly occur as classifying P1a1, P1a2 and P2b as H1, especially along some streams outlets or close to water. 
+Comparing \cref{xgb_ss,xgb_ssac}, it is observed that small objects better in the P2b and H1 classes but are less satisfying in other classes. From the spatial prediction maps, We can observe that mis-classification mostly occur as classifying P1a1, P1a2 and P2b as H1, especially along some channel outlets or close to water.
+
 %\subsection{Variable importance}
 %The top-5 most important characteristics (calculated from XGBoost gain) describe spectral properties, the 7th on the texture within the object, and 10th is based on the sub-objects.
-
 \begin{table}[]
     \centering
 \begin{tabular}{lrrrrr}
 \toprule
-{} &  P1a1 &  P1a2 &  P2b &  P2c &   H1 \\
+{} &  P1a1 &  P1a2 &  P2b &  P2c &  H1 \\
 \midrule
-P1a1             &  31.7 &   3.1 &  0.3 &  3.7 &  0.5 \\
-P1a2             &   3.2 &  17.6 &  0.4 &  1.8 &  0.9 \\
-P2b              &   1.0 &   0.6 & 12.6 &  3.1 &  0.2 \\
-P2c              &   1.9 &   0.9 &  1.4 & 11.8 &  0.4 \\
-H1               &   0.1 &   0.0 &  0.0 &  0.1 &  2.7 \\
-\midrule
-precision        &  83.8 &  79.5 & 85.5 & 57.6 & 57.2 \\
-recall           &  80.6 &  73.7 & 72.1 & 72.2 & 93.1 \\
-overall accuracy &  76.5 &       &      &      &      \\
+P1a1             &   7.0 &   4.2 &  1.2 &  9.1 & 0.1 \\
+P1a2             &   8.0 &   3.3 &  4.9 &  2.6 & 1.1 \\
+P2b              &   5.2 &   2.0 & 24.2 &  8.0 & 0.8 \\
+P2c              &   1.4 &   3.9 &  1.0 & 11.5 & 0.1 \\
+H1               &   0.0 &   0.0 &  0.1 &  0.1 & 0.0 \\
+precision        &  32.4 &  24.4 & 77.2 & 36.8 & 1.3 \\
+recall           &  32.6 &  16.5 & 60.2 & 64.1 & 8.9 \\
+overall accuracy &  46.1 &       &      &      &     \\
 \bottomrule
- \end{tabular}
-\caption{Accuracy assessed with the sampling and validation scheme SSAC. Confusion matrix normalised by the entire area. Precision, recall, and overall accuracy (\%) are calculated using area-weighted accuracy assessment. }
+\end{tabular}
+
+\caption{Accuracy assessed with the sampling and validation scheme SSAC, on test tiles. Confusion matrix is normalised by the entire area. Precision, recall, and overall accuracy (\%) are calculated using area-weighted accuracy assessment. }
+
     \label{xgb_ssac}
 \end{table}
 
 \begin{table}[]
     \centering
+    
 \begin{tabular}{lrrrrr}
 \toprule
 {} &  P1a1 &  P1a2 &  P2b &  P2c &   H1 \\
 \midrule
-P1a1             &  24.9 &   2.4 &  0.4 &  2.9 &  0.5 \\
-P1a2             &   2.3 &  15.5 &  0.8 &  1.7 &  1.1 \\
-P2b              &   1.1 &   1.2 & 22.2 &  3.6 &  0.4 \\
-P2c              &   1.3 &   1.0 &  2.0 & 10.0 &  0.6 \\
-H1               &   0.1 &   0.0 &  0.0 &  0.1 &  3.7 \\
-\midrule
-precision        &  84.0 &  77.0 & 87.3 & 54.4 & 58.5 \\
-recall           &  80.0 &  72.5 & 77.8 & 67.2 & 92.8 \\
-overall accuracy &  76.4 &       &      &      &      \\
+P1a1             &   4.2 &   4.4 &  1.4 &  5.4 &  0.1 \\
+P1a2             &   5.4 &   2.7 &  9.2 &  2.3 &  1.6 \\
+P2b              &   3.1 &   2.6 & 36.6 &  6.4 &  1.6 \\
+P2c              &   0.8 &   2.9 &  1.3 &  7.3 &  0.2 \\
+H1               &   0.0 &   0.0 &  0.2 &  0.2 &  0.1 \\
+precision        &  30.7 &  21.6 & 75.1 & 33.8 &  1.9 \\
+recall           &  26.9 &  12.8 & 72.7 & 58.5 & 14.0 \\
+overall accuracy &  50.8 &       &      &      &      \\
 \bottomrule
 \end{tabular}
     \caption{Accuracy assessed with the sampling and validation scheme SS. Confusion matrix normalised by the number of total objects. Precision, recall, and overall accuracy (\%) are calculated using area-weighted accuracy assessment.}
@@ -249,14 +246,14 @@ overall accuracy &  76.4 &       &      &      &      \\
 
  \begin{figure}[!h]
     \centering
-    \includegraphics[width=\linewidth]{figures/Spatial_50_15_all_classes_xgb.png}
-    \caption{Maps of method OBIA-XGB. A: ground truth, B: predicted labels, C: Predicted probability.}
+    \includegraphics[width=\linewidth]{figures/prediction_westerscheldt_merged.png}
+    \caption{Maps of method OBIA-XGB. Figure (b) is a zoom-in of the figure (a).}
     \label{fig:spxgb}
 \end{figure}
 
 \subsubsection{Method based on U-net}
 
-The U-net segmentation obtained a lower accuracy compared to the method OBIA-XGB (\cref{xgb_ssac,deepconf}). P2b again obtained the best result relative the the other classes. The model failed completely to predict the H1 class.  
+The U-net segmentation obtained a considerably lower accuracy for P2b and P2c compared to the method OBIA-XGB (\cref{xgb_ssac,deepconf}) but obtained a much better result for P1a1. P2b again obtained the best result compared to the other classes. The model failed completely to predict the H1 class.  
 
  \begin{table}
   \centering
@@ -283,14 +280,11 @@ Confusion matrix normalised by the number of total objects, precision, recall, a
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.2]{figures/prediction_merged.png}
+    \includegraphics[scale=0.2]{figures/prediction_westerscheldt_merged.png}
     \caption{Example of predictions from the best U-net model for Western Scheldt. A, Upper row: the prediction and the validation (i.e. reference) maps. Bottom row: the probability of the predictions and the false-color image. B, a closer look at the predictions. }
     \label{fig:deepsp}
 \end{figure}
 
-\subsubsection{Comparison between the methods OBIA-XGB and U-net}
-
-To compare with the U-net based method, we apply the XGB model to the three tiles that are used for testing in deep learning (\cref{fig:tt}, note that these three tiles were not used in the XGB training). Comparing between \cref{tab:xgb_unettile} and \cref{deepconf}, we can observe that the OBIA-XGB method obtained a much higher accuracy. 
 
 \begin{table}[]
     \centering
@@ -315,16 +309,14 @@ overall accuracy &  55.9 &       &      &      &      \\
  
 \section{Conclusion}
 
-In this study, we compared machine learning methods that are based on OBIA-derived features vs. end-to-end representative learning, for inter-tidal area classification, with respectively XGBoost and U-net. The method that applies XGBoost to OBIA-derived features (OBIA-XGB) outperforms the U-net based methods. The OBIA-XGB obtained satisfying results in separating between the inter-tidal low and high dynamic shoals, as well as the natural hard substrates, which are sometimes more difficult to distinct manually or basing on the rule-based OBIA methods alone. Therefore, our study indicates that machine learning methods can help to improve the rule-based OBIA method. Future studies aim at further improvement of deep learning-based method.
+In this study, we compared machine learning methods that are based on OBIA-derived features vs. end-to-end representative learning, for inter-tidal area classification, with respectively XGBoost and U-net. The method that applies XGBoost to OBIA-derived features (OBIA-XGB) outperforms the U-net based methods in P2b and P2c, but the U-net method can better separate between P1a1 and P1a2. The OBIA-XGB obtained satisfying results in separating between the P2b and other classes, which is sometimes more difficult to distinct manually or basing on the rule-based OBIA methods alone. Therefore, our study indicates that machine learning methods can help to improve the rule-based OBIA method. Future studies aim at further improvement of deep learning-based method.
 
 %by using channel attentions, multi-scale approaches, and generative modeling. We also aim at a integration of OBIA and deep learning-based method to combine prior knowledge into machine learning techniques. Our two geomorphologically distinct study areas provide us unique opportunities to gain an in-depth insight of model generality.
 
 
 \section{Acknowledgement}
- 
 
-
-
+This study was performed at Utrecht University with a contribution from the project 'Optimalisatie productie GMK met behulp van OBIA' financed by Rijkswaterstaat (Contract nummer: 31160225). 
 
 
 %\bibliographystyle{plain}
